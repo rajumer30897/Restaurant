@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>JAY GAJANAND VISHNU RESTAURANT - Complete User Portal</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -25,8 +26,13 @@
             }
         }
     </script>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QR Code Library -->
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <!-- Leaflet.js CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -36,6 +42,7 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        #live-map { z-index: 10; }
     </style>
 </head>
 <body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col overflow-hidden">
@@ -68,6 +75,7 @@
         });
     </script>
 
+    <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
     <header class="h-16 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-3 sm:px-6 z-40 shrink-0">
@@ -100,6 +108,7 @@
 
     <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
         
+        <!-- Home / Menu Tab -->
         <div id="tab-content-home" class="customer-tab flex-1 flex flex-col md:flex-row h-full overflow-hidden">
             <div class="flex-1 flex flex-col h-full overflow-y-auto pb-24 md:pb-6">
                 <!-- Hero Banner -->
@@ -110,7 +119,7 @@
                     <div class="z-10 space-y-1.5 text-center md:text-left">
                         <span class="px-2.5 py-0.5 bg-white/20 rounded-full text-[10px] sm:text-xs font-semibold backdrop-blur-md uppercase tracking-wider">100% Pure Vegetarian Cloud Kitchen</span>
                         <h2 class="text-xl sm:text-3xl font-extrabold tracking-tight">Authentic Taste, Delivered Fast</h2>
-                        <p class="text-xs text-brand-100 max-w-lg">Order pure vegetarian meals online with secure UPI payment (<span class="font-bold">9512658309-5@ybl</span>) & account-tied mobile tracking.</p>
+                        <p class="text-xs text-brand-100 max-w-lg">Order pure vegetarian meals online with secure UPI payment (<span class="font-bold">9512658309-5@ybl</span>) & real-time Leaflet GPS tracking.</p>
                     </div>
                     <div class="z-10 flex gap-2 w-full md:w-auto justify-center">
                         <div class="glass-card bg-white/10 dark:bg-slate-900/40 p-2.5 sm:p-3 rounded-2xl border border-white/20 text-center min-w-[110px]">
@@ -186,19 +195,20 @@
             </aside>
         </div>
 
+        <!-- My Orders & Leaflet Tracking Tab -->
         <div id="tab-content-orders" class="customer-tab flex-1 flex flex-col h-full overflow-y-auto p-3 sm:p-6 hidden space-y-5">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
                 <div>
                     <h2 class="text-lg sm:text-xl font-bold flex items-center gap-2">
-                        <i class="fa-solid fa-shield-halved text-brand-500"></i> My Account Order Tracking
+                        <i class="fa-solid fa-shield-halved text-brand-500"></i> My Account Order Tracking & Leaflet GPS
                     </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Strictly private & secured to your logged-in mobile number account. Only you can view these orders.</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Strictly secured to your logged-in mobile number account. Track customer, rider, and restaurant live positions.</p>
                 </div>
                 <button onclick="switchTab('home')" class="px-4 py-2.5 bg-brand-500 text-white rounded-xl text-xs font-bold hover:bg-brand-600 transition-all shrink-0">Back to Menu</button>
             </div>
 
             <!-- Logged-in Mobile Verification Card -->
-            <div class="glass-card p-5 rounded-3xl space-y-4 max-w-2xl mx-auto w-full shadow-sm">
+            <div class="glass-card p-5 rounded-3xl space-y-4 max-w-4xl mx-auto w-full shadow-sm">
                 <div class="flex items-center justify-between flex-wrap gap-3">
                     <div>
                         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Secured Account Mobile Number</span>
@@ -217,8 +227,25 @@
                 </div>
             </div>
 
+            <!-- Leaflet Live Map Card for Food Delivery Tracking -->
+            <div id="tracking-map-wrapper" class="glass-card p-4 sm:p-5 rounded-3xl space-y-3 max-w-4xl mx-auto w-full shadow-sm hidden">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <h3 class="font-bold text-sm sm:text-base flex items-center gap-2">
+                        <i class="fa-solid fa-map-location-dot text-brand-500"></i> Live Rider & Customer Delivery Map
+                    </h3>
+                    <button onclick="requestUserLocationPermission()" class="px-3 py-1.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-location-crosshairs"></i> Refresh My GPS Position
+                    </button>
+                </div>
+                <div id="live-map" class="w-full h-72 sm:h-96 rounded-2xl border border-slate-300 dark:border-slate-700 z-10"></div>
+                <div class="flex items-center justify-between text-[11px] text-slate-500 px-1">
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-brand-500 inline-block"></span> Restaurant / Rider</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Customer Delivery Pin</span>
+                </div>
+            </div>
+
             <!-- Secured Account Orders Container -->
-            <div id="customer-orders-container" class="space-y-4 max-w-2xl mx-auto w-full pb-16">
+            <div id="customer-orders-container" class="space-y-4 max-w-4xl mx-auto w-full pb-16">
                 <div class="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-2">
                     <div class="w-12 h-12 bg-brand-50 dark:bg-brand-950/50 text-brand-500 rounded-2xl flex items-center justify-center mx-auto text-xl">
                         <i class="fa-solid fa-lock"></i>
@@ -320,7 +347,7 @@
                     <input type="password" id="reg-password" placeholder="At least 6 characters" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs">
                 </div>
                 <div class="space-y-1">
-                    <label class="block font-semibold">Delivery Address</label>
+                    <label class="block font-semibold">Delivery Address & GPS Permit</label>
                     <textarea id="reg-address" rows="2" placeholder="House/Flat no, Street..." class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"></textarea>
                 </div>
                 <button type="button" onclick="handleUserRegistration()" class="w-full py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-md transition-all">Complete Registration</button>
@@ -361,7 +388,7 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block font-semibold mb-1">Delivery Address</label>
+                    <label class="block font-semibold mb-1">Delivery Address & GPS Permit</label>
                     <textarea id="checkout-address" rows="2" placeholder="House no, Street, Landmark..." required class="w-full p-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"></textarea>
                 </div>
                 
@@ -390,6 +417,9 @@
         let appliedCoupon = null;
         let selectedCategoryFilter = 'All';
         let currentUser = null;
+        let leafletMap = null;
+        let mapMarkers = {};
+        let userLocationCoords = { lat: 21.1702, lng: 72.8311 }; // Default fallback (Surat / Vapi region)
 
         window.onload = function() {
             const savedUser = localStorage.getItem('jgvr_current_user');
@@ -400,7 +430,65 @@
             }
             renderAuthHeader();
             initFirebaseSync();
+            requestUserLocationPermission();
         };
+
+        function requestUserLocationPermission() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocationCoords = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        showToast("Customer & Rider GPS Location Permission Granted!", "success");
+                        if (leafletMap) {
+                            leafletMap.setView([userLocationCoords.lat, userLocationCoords.lng], 14);
+                        }
+                    },
+                    (error) => {
+                        console.warn("Geolocation permission error or denied:", error.message);
+                        showToast("Location permission denied. Using default restaurant map area.", "error");
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            }
+        }
+
+        function initLeafletMap(containerId, centerLat, centerLng, markersData = []) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (!leafletMap) {
+                leafletMap = L.map(containerId).setView([centerLat, centerLng], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(leafletMap);
+            } else {
+                leafletMap.setView([centerLat, centerLng], 13);
+                // Clear existing markers
+                Object.values(mapMarkers).forEach(m => leafletMap.removeLayer(m));
+                mapMarkers = {};
+            }
+
+            markersData.forEach(item => {
+                if (item.lat && item.lng) {
+                    const customIcon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div style="background-color:${item.color || '#f97316'}; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:12px; font-weight:bold; box-shadow:0 3px 6px rgba(0,0,0,0.3); border:2px solid white;"><i class="fa-solid ${item.icon || 'fa-map-pin'}"></i></div>`,
+                        iconSize: [28, 28],
+                        iconAnchor: [14, 14]
+                    });
+                    const marker = L.marker([item.lat, item.lng], { icon: customIcon }).addTo(leafletMap);
+                    marker.bindPopup(`<b>${item.title}</b><br>${item.desc || ''}`);
+                    mapMarkers[item.id] = marker;
+                }
+            });
+            
+            // Invalidate size in case tab was hidden
+            setTimeout(() => { leafletMap.invalidateSize(); }, 300);
+        }
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -467,12 +555,12 @@
             container.scrollTop = container.scrollHeight;
 
             setTimeout(() => {
-                let reply = "Thank you for contacting Jay Gajanand Vishnu Restaurant. All items are 100% Pure Vegetarian. For your private order tracking, please check the 'My Orders' tab after logging into your account!";
+                let reply = "Thank you for contacting Jay Gajanand Vishnu Restaurant. All items are 100% Pure Vegetarian. For your private order tracking and Leaflet GPS map, please check the 'My Orders' tab after logging in!";
                 const lower = text.toLowerCase();
                 if (lower.includes('payment') || lower.includes('upi') || lower.includes('utr')) {
                     reply = "Our official UPI VPA is 9512658309-5@ybl. After QR scan payment, enter your 12-digit UTR reference number.";
-                } else if (lower.includes('delivery') || lower.includes('time') || lower.includes('track')) {
-                    reply = "Your orders are strictly secured and tied to your logged-in mobile number account in the 'My Orders' section.";
+                } else if (lower.includes('delivery') || lower.includes('time') || lower.includes('track') || lower.includes('map')) {
+                    reply = "You can track live rider and customer GPS locations on Leaflet map in the 'My Orders' section tied to your registered mobile number.";
                 } else if (lower.includes('veg') || lower.includes('pure')) {
                     reply = "Yes! We serve 100% Pure Vegetarian Kathiyawadi & Fast Food delicacies.";
                 }
@@ -559,7 +647,16 @@
             }
 
             const { db, appId, ref, set, push } = window.firebaseApp;
-            const newUserObj = { name, phone, email, password, address, createdAt: new Date().toISOString() };
+            const newUserObj = { 
+                name, 
+                phone, 
+                email, 
+                password, 
+                address, 
+                lat: userLocationCoords.lat, 
+                lng: userLocationCoords.lng, 
+                createdAt: new Date().toISOString() 
+            };
             
             const userRef = push(ref(db, `artifacts/${appId}/public/data/users`));
             set(userRef, newUserObj);
@@ -818,10 +915,10 @@
             const code = document.getElementById('coupon-code-input').value.trim().toUpperCase();
             if (code === 'GAJANAND10' || code === 'WELCOME50') {
                 appliedCoupon = { code, discount: code === 'GAJANAND10' ? 10 : 20 };
-                showToast(`Coupon ${code} applied!`);
+                showToast(`Coupon ${code} applied successfully!`);
                 updateCartUI();
             } else {
-                showToast("Invalid or expired coupon code", "error");
+                showToast("Invalid coupon code", "error");
             }
         }
 
@@ -831,170 +928,190 @@
                 return;
             }
             if (!currentUser) {
-                showToast("Please login with your mobile number first", "error");
+                showToast("Please login first to place an order", "error");
                 openLoginModal();
                 return;
             }
-            if (currentUser) {
-                if (document.getElementById('checkout-name')) document.getElementById('checkout-name').value = currentUser.name || '';
-                if (document.getElementById('checkout-phone')) document.getElementById('checkout-phone').value = currentUser.phone || '';
-                if (document.getElementById('checkout-address')) document.getElementById('checkout-address').value = currentUser.address || '';
-            }
+
+            document.getElementById('checkout-name').value = currentUser.name || '';
+            document.getElementById('checkout-phone').value = currentUser.phone || '';
+            document.getElementById('checkout-address').value = currentUser.address || '';
             openModal('checkout-modal');
         }
 
         function updateCheckoutQR() {
+            const qrContainer = document.getElementById('checkout-qrcode-container');
+            const qrAmountEl = document.getElementById('checkout-qr-amount');
+            if (!qrContainer) return;
+
             const subtotal = cart.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
             const deliveryFee = subtotal > 0 ? settings.deliveryFee : 0;
-            const discount = appliedCoupon ? (subtotal * appliedCoupon.discount / 100) : 0;
+            let discount = appliedCoupon ? (subtotal * appliedCoupon.discount / 100) : 0;
             const total = Math.max(0, subtotal + deliveryFee - discount);
 
-            const container = document.getElementById('checkout-qrcode-container');
-            const amountEl = document.getElementById('checkout-qr-amount');
-            if (amountEl) amountEl.innerText = `Total Amount: ₹${total}`;
-
-            if (container) {
-                container.innerHTML = '';
-                const upiString = `upi://pay?pa=${settings.upi}&pn=${encodeURIComponent(settings.name)}&am=${total}&cu=INR`;
-                new QRCode(container, { text: upiString, width: 150, height: 150 });
-            }
+            if (qrAmountEl) qrAmountEl.innerText = `Total Amount: ₹${total}`;
+            qrContainer.innerHTML = '';
+            
+            const upiString = `upi://pay?pa=9512658309-5@ybl&pn=JayGajanandVishnu&am=${total}&cu=INR`;
+            new QRCode(qrContainer, {
+                text: upiString,
+                width: 140,
+                height: 140,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
         }
 
         function submitOrder() {
-            if (!currentUser || !currentUser.phone) {
-                showToast("Session expired. Please login again.", "error");
-                openLoginModal();
-                return;
-            }
-
             const name = document.getElementById('checkout-name').value.trim();
-            const phone = currentUser.phone; // Locked to logged-in account mobile number
+            const phone = document.getElementById('checkout-phone').value.trim();
             const address = document.getElementById('checkout-address').value.trim();
             const utr = document.getElementById('checkout-utr').value.trim();
 
-            if (!name || !address || !utr) {
-                showToast("Please fill all details & UPI UTR reference number", "error");
+            if (!name || !address) {
+                showToast("Please fill in delivery details", "error");
+                return;
+            }
+            if (!utr || utr.length < 6) {
+                showToast("Please enter a valid 12-digit UTR reference number after UPI payment", "error");
                 return;
             }
 
             const subtotal = cart.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
             const deliveryFee = subtotal > 0 ? settings.deliveryFee : 0;
-            const discount = appliedCoupon ? (subtotal * appliedCoupon.discount / 100) : 0;
+            let discount = appliedCoupon ? (subtotal * appliedCoupon.discount / 100) : 0;
             const total = Math.max(0, subtotal + deliveryFee - discount);
 
-            const newOrder = {
-                id: 'GJV' + Math.floor(1000 + Math.random() * 9000),
+            const { db, appId, ref, set, push } = window.firebaseApp;
+            const orderObj = {
                 customerName: name,
-                customerPhone: phone, // Tied to logged-in user mobile number
-                address: address,
-                items: [...cart],
-                subtotal: subtotal,
-                total: total,
-                utr: utr,
-                paymentMode: 'UPI (9512658309-5@ybl)',
-                status: 'NEW',
-                timestamp: new Date().toISOString()
+                customerPhone: phone || (currentUser ? currentUser.phone : '9999999999'),
+                customerAddress: address,
+                lat: userLocationCoords.lat,
+                lng: userLocationCoords.lng,
+                items: cart,
+                subtotal,
+                deliveryFee,
+                discount,
+                totalAmount: total,
+                utrReference: utr,
+                paymentStatus: 'Paid (UPI Verified)',
+                orderStatus: 'Pending',
+                riderAssigned: 'Unassigned',
+                riderPhone: '',
+                riderLat: 21.1750,
+                riderLng: 72.8350,
+                createdAt: new Date().toISOString()
             };
 
-            const { db, appId, ref, push, set } = window.firebaseApp;
             const newOrderRef = push(ref(db, `artifacts/${appId}/public/data/orders`));
-            set(newOrderRef, newOrder);
-
-            showToast("Order placed successfully with UPI payment!");
-            cart = [];
-            updateCartUI();
-            closeModal('checkout-modal');
-            
-            // Switch to secured account orders tracking tab
-            switchTab('orders');
+            set(newOrderRef, orderObj).then(() => {
+                showToast("Order placed successfully with UPI payment & GPS lock!");
+                cart = [];
+                updateCartUI();
+                closeModal('checkout-modal');
+                switchTab('orders');
+            }).catch(err => {
+                showToast("Failed to place order. Check connection.", "error");
+            });
         }
 
         function renderUserAccountOrders() {
             const container = document.getElementById('customer-orders-container');
+            const mapWrapper = document.getElementById('tracking-map-wrapper');
             if (!container) return;
 
-            if (!currentUser || !currentUser.phone) {
+            if (!currentUser) {
+                if (mapWrapper) mapWrapper.classList.add('hidden');
                 container.innerHTML = `
-                    <div class="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-3">
+                    <div class="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-2">
                         <div class="w-12 h-12 bg-brand-50 dark:bg-brand-950/50 text-brand-500 rounded-2xl flex items-center justify-center mx-auto text-xl">
                             <i class="fa-solid fa-lock"></i>
                         </div>
                         <p class="font-bold text-sm">Please Log In to View Your Secured Orders</p>
-                        <p class="text-xs text-slate-400 max-w-sm mx-auto">Your orders are strictly tied and secured to your mobile account number and cannot be accessed by anyone else.</p>
-                        <button onclick="openLoginModal()" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold transition-all shadow-md">
-                            <i class="fa-solid fa-user mr-1"></i> Login with Mobile Number
-                        </button>
+                        <p class="text-xs text-slate-400 max-w-sm mx-auto">Your order history is kept private and safe. Log in with your registered mobile number.</p>
+                        <button onclick="openLoginModal()" class="mt-2 px-4 py-2 bg-brand-500 text-white font-bold rounded-xl text-xs">Login Now</button>
                     </div>
                 `;
                 return;
             }
 
-            // STRICT FILTERING: Only orders matching the logged-in user's mobile number are shown
-            const userPhone = currentUser.phone;
-            const matchedOrders = myOrders.filter(o => o.customerPhone === userPhone);
+            // Strictly filter orders by logged-in user's mobile number
+            const userFilteredOrders = myOrders.filter(o => o.customerPhone === currentUser.phone);
 
-            if (matchedOrders.length === 0) {
+            if (userFilteredOrders.length === 0) {
+                if (mapWrapper) mapWrapper.classList.add('hidden');
                 container.innerHTML = `
                     <div class="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-2">
                         <div class="w-12 h-12 bg-brand-50 dark:bg-brand-950/50 text-brand-500 rounded-2xl flex items-center justify-center mx-auto text-xl">
-                            <i class="fa-solid fa-receipt"></i>
+                            <i class="fa-solid fa-bag-shopping"></i>
                         </div>
-                        <p class="font-bold text-sm">No Orders Found for +91 ${userPhone}</p>
-                        <p class="text-xs text-slate-400 max-w-sm mx-auto">You haven't placed any orders yet from this account. Explore our menu and place your first pure vegetarian order!</p>
-                        <button onclick="switchTab('home')" class="mt-2 px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold transition-all shadow-md">
-                            Browse Pure Veg Menu
-                        </button>
+                        <p class="font-bold text-sm">No Orders Found for +91 ${currentUser.phone}</p>
+                        <p class="text-xs text-slate-400">Place an order from the menu to track live delivery status on Leaflet map!</p>
+                        <button onclick="switchTab('home')" class="mt-2 px-4 py-2 bg-brand-500 text-white font-bold rounded-xl text-xs">Explore Menu</button>
                     </div>
                 `;
                 return;
             }
 
-            container.innerHTML = matchedOrders.reverse().map(o => `
-                <div class="glass-card p-4 sm:p-5 rounded-3xl space-y-4 text-xs shadow-sm border border-slate-200 dark:border-slate-800">
-                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+            if (mapWrapper) mapWrapper.classList.remove('hidden');
+
+            // Prepare Leaflet Map markers for customer and active orders
+            const mapMarkersData = [
+                { id: 'restaurant', title: 'Jay Gajanand Vishnu Restaurant', lat: 21.1702, lng: 72.8311, color: '#f97316', icon: 'fa-utensils', desc: 'Cloud Kitchen HQ' },
+                { id: 'customer', title: currentUser.name + ' (You)', lat: currentUser.lat || userLocationCoords.lat, lng: currentUser.lng || userLocationCoords.lng, color: '#3b82f6', icon: 'fa-user', desc: currentUser.address }
+            ];
+
+            userFilteredOrders.forEach(ord => {
+                if (ord.riderLat && ord.riderLng && ord.orderStatus === 'Out for Delivery') {
+                    mapMarkersData.push({
+                        id: 'rider_' + ord.id,
+                        title: 'Delivery Rider (' + (ord.riderAssigned || 'Assigned') + ')',
+                        lat: ord.riderLat,
+                        lng: ord.riderLng,
+                        color: '#10b981',
+                        icon: 'fa-motorcycle',
+                        desc: 'Delivering order #' + ord.id.slice(-4)
+                    });
+                }
+            });
+
+            setTimeout(() => {
+                initLeafletMap('live-map', currentUser.lat || userLocationCoords.lat, currentUser.lng || userLocationCoords.lng, mapMarkersData);
+            }, 200);
+
+            container.innerHTML = userFilteredOrders.map(o => `
+                <div class="glass-card p-5 rounded-3xl shadow-sm space-y-4 text-xs">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 gap-2">
                         <div>
-                            <span class="font-bold text-sm text-brand-600">${o.id}</span>
-                            <p class="text-[10px] text-slate-400">${new Date(o.timestamp).toLocaleString()}</p>
+                            <span class="text-[10px] text-slate-400 uppercase font-bold">Order ID: #${o.id.slice(-6)}</span>
+                            <h4 class="font-bold text-sm sm:text-base mt-0.5">${new Date(o.createdAt).toLocaleString()}</h4>
                         </div>
-                        <span class="px-3 py-1 rounded-full font-bold text-[10px] ${o.status === 'NEW' ? 'bg-amber-100 text-amber-700 animate-pulse' : o.status === 'DELIVERED' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}">
-                            Status: ${o.status}
-                        </span>
-                    </div>
-
-                    <div class="space-y-2">
-                        <p class="font-bold text-slate-600 dark:text-slate-300">Ordered Items (100% Pure Veg):</p>
-                        <div class="divide-y divide-slate-100 dark:divide-slate-800">
-                            ${o.items.map(i => `
-                                <div class="flex justify-between py-1.5">
-                                    <span>${i.qty}x${i.name}</span>
-                                    <span class="font-semibold">₹${i.price * i.qty}</span>
-                                </div>
-                            `).join('')}
+                        <div class="flex items-center space-x-2">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold ${
+                                o.orderStatus === 'Delivered' ? 'bg-emerald-100 text-emerald-700' :
+                                o.orderStatus === 'Out for Delivery' ? 'bg-amber-100 text-amber-700' : 'bg-brand-100 text-brand-700'
+                            }">${o.orderStatus}</span>
+                            <span class="font-extrabold text-brand-600 text-sm">₹${o.totalAmount}</span>
                         </div>
                     </div>
 
-                    <!-- Live Status Timeline Tracker -->
-                    <div class="pt-3 border-t border-slate-200 dark:border-slate-800">
-                        <p class="font-bold mb-2.5 uppercase tracking-wider text-[10px] text-slate-400">Live Status Timeline</p>
-                        <div class="grid grid-cols-4 gap-1.5 text-center text-[10px]">
-                            <div class="p-2.5 rounded-xl ${['NEW', 'ACCEPTED', 'PREPARING', 'READY', 'DELIVERED'].includes(o.status) ? 'bg-brand-500 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-900 text-slate-400'}">
-                                <i class="fa-solid fa-receipt block mb-0.5 text-xs"></i> Placed
-                            </div>
-                            <div class="p-2.5 rounded-xl ${['ACCEPTED', 'PREPARING', 'READY', 'DELIVERED'].includes(o.status) ? 'bg-brand-500 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-900 text-slate-400'}">
-                                <i class="fa-solid fa-check-circle block mb-0.5 text-xs"></i> Accepted
-                            </div>
-                            <div class="p-2.5 rounded-xl ${['PREPARING', 'READY', 'DELIVERED'].includes(o.status) ? 'bg-brand-500 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-900 text-slate-400'}">
-                                <i class="fa-solid fa-fire-burner block mb-0.5 text-xs"></i> Preparing
-                            </div>
-                            <div class="p-2.5 rounded-xl ${['READY', 'DELIVERED'].includes(o.status) ? 'bg-emerald-500 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-900 text-slate-400'}">
-                                <i class="fa-solid fa-motorcycle block mb-0.5 text-xs"></i> Delivered
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <p class="font-bold text-slate-400 uppercase text-[10px]">Ordered Items (100% Pure Veg)</p>
+                            <div class="space-y-1 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl">
+                                ${o.items.map(i => `<div class="flex justify-between"><span>${i.name} x ${i.qty}</span><span class="font-bold">₹${i.price * i.qty}</span></div>`).join('')}
                             </div>
                         </div>
-                    </div>
-
-                    <div class="flex justify-between items-center pt-2 font-bold text-xs sm:text-sm bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200 dark:border-slate-800">
-                        <span>Total Paid (UPI UTR: ${o.utr})</span>
-                        <span class="text-brand-600">₹${o.total}</span>
+                        <div class="space-y-2">
+                            <div class="p-3 bg-brand-50 dark:bg-brand-950/40 rounded-2xl space-y-1">
+                                <p class="font-bold text-brand-600">Delivery Information</p>
+                                <p class="text-slate-600 dark:text-slate-300"><b>Address:</b> ${o.customerAddress}</p>
+                                <p class="text-slate-600 dark:text-slate-300"><b>UTR Ref:</b> ${o.utrReference}</p>
+                                <p class="text-slate-600 dark:text-slate-300"><b>Rider:</b> ${o.riderAssigned} (${o.riderPhone || 'Assigned'})</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `).join('');
