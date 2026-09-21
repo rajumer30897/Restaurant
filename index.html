@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JAY GAJANAND VISHNU RESTAURANT - Complete User Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(229, 231, 235, 0.8); }
+        .dark .glass-card { background: rgba(17, 24, 39, 0.95); border: 1px solid rgba(55, 65, 81, 0.8); }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col overflow-hidden">
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getDatabase, ref, set, get, update, remove, onValue, push, child } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTUYIJCoUwSnfPcDdAWUuov3GdvexJwlo",
+            authDomain: "mahadev-256c1.firebaseapp.com",
+            databaseURL: "https://mahadev-256c1-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "mahadev-256c1",
+            storageBucket: "mahadev-256c1.firebasestorage.app",
+            messagingSenderId: "733700932311",
+            appId: "1:733700932311:web:447e4de3ce28edbd0f2692",
+            measurementId: "G-SD1M67B4NF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'jay-gajanand-vishnu';
+
+        window.firebaseApp = { app, auth, db, appId, ref, set, get, update, remove, onValue, push, child };
+        
+        signInAnonymously(auth).catch((error) => {
+            console.error("Anonymous auth error:", error);
+        });
+    </script>
+
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <header class="h-16 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-3 sm:px-6 z-40 shrink-0">
+        <div class="flex items-center space-x-2">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 bg-brand-500 text-white rounded-xl flex items-center justify-center font-bold shadow-md shadow-brand-500/20 text-sm">
+                <i class="fa-solid fa-utensils"></i>
+            </div>
+            <div>
+                <div class="flex items-center space-x-1.5">
+                    <h1 class="font-bold text-xs sm:text-sm md:text-base leading-tight truncate max-w-[150px] sm:max-w-none">JAY GAJANAND VISHNU</h1>
+                </div>
+                <p class="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400">UPI: <span class="font-bold text-brand-600">9512658309-5@ybl</span></p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-1.5 sm:space-x-2">
+            <div id="auth-header-actions" class="flex items-center space-x-1"></div>
+            <button onclick="switchTab('orders')" class="relative px-2.5 sm:px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 text-[11px] sm:text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors flex items-center gap-1">
+                <i class="fa-solid fa-shield-halved text-brand-500"></i><span class="hidden xs:inline">My Orders</span>
+            </button>
+            <button onclick="openHelpChatModal()" class="relative px-2.5 sm:px-3 py-2 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 text-[11px] sm:text-xs font-bold hover:bg-brand-100 transition-colors flex items-center gap-1">
+                <i class="fa-solid fa-headset"></i><span class="hidden sm:inline">Help</span>
+            </button>
+            <button onclick="toggleDarkMode()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+                <i class="fa-solid fa-moon dark:hidden text-xs"></i>
+                <i class="fa-solid fa-sun hidden dark:block text-xs"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+        
+        <div id="tab-content-home" class="customer-tab flex-1 flex flex-col md:flex-row h-full overflow-hidden">
+            <div class="flex-1 flex flex-col h-full overflow-y-auto pb-24 md:pb-6">
+                <!-- Hero Banner -->
+                <div class="bg-gradient-to-r from-brand-600 to-brand-800 text-white p-4 sm:p-8 m-3 sm:m-4 rounded-3xl shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="absolute right-0 top-0 bottom-0 opacity-10 flex items-center pointer-events-none pr-6">
+                        <i class="fa-solid fa-bowl-food text-8xl"></i>
+                    </div>
+                    <div class="z-10 space-y-1.5 text-center md:text-left">
+                        <span class="px-2.5 py-0.5 bg-white/20 rounded-full text-[10px] sm:text-xs font-semibold backdrop-blur-md uppercase tracking-wider">100% Pure Vegetarian Cloud Kitchen</span>
+                        <h2 class="text-xl sm:text-3xl font-extrabold tracking-tight">Authentic Taste, Delivered Fast</h2>
+                        <p class="text-xs text-brand-100 max-w-lg">Order pure vegetarian meals online with secure UPI payment (<span class="font-bold">9512658309-5@ybl</span>) & account-tied mobile tracking.</p>
+                    </div>
+                    <div class="z-10 flex gap-2 w-full md:w-auto justify-center">
+                        <div class="glass-card bg-white/10 dark:bg-slate-900/40 p-2.5 sm:p-3 rounded-2xl border border-white/20 text-center min-w-[110px]">
+                            <p class="text-[9px] text-brand-100 uppercase">Status</p>
+                            <p id="user-restaurant-status" class="text-xs sm:text-sm font-bold text-emerald-300 flex items-center justify-center gap-1.5 mt-0.5"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> OPEN NOW</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categories Filter -->
+                <div class="px-3 sm:px-6 mb-3">
+                    <h3 class="font-bold text-xs uppercase tracking-wider text-slate-500 mb-2">Explore Categories (100% Pure Veg)</h3>
+                    <div id="user-categories-container" class="flex items-center space-x-2.5 overflow-x-auto pb-2 no-scrollbar"></div>
+                </div>
+
+                <!-- Food Items Grid -->
+                <div class="px-3 sm:px-6 pb-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2">
+                        <h3 id="selected-category-title" class="font-bold text-base sm:text-lg">All Menu Items</h3>
+                        <input type="text" id="user-search-input" oninput="filterUserProducts()" placeholder="Search pure veg dishes..." class="px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div id="user-products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"></div>
+                </div>
+            </div>
+
+            <!-- Cart & Checkout Sidebar -->
+            <aside class="w-full md:w-96 bg-white dark:bg-slate-950 border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 flex flex-col z-30 shrink-0 h-auto md:h-full max-h-[75vh] md:max-h-full">
+                <div class="p-3.5 sm:p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 bg-brand-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                        </div>
+                        <h3 class="font-bold text-xs sm:text-sm">Your Order Cart</h3>
+                    </div>
+                    <span id="cart-item-count" class="px-2.5 py-0.5 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-600 dark:text-brand-400 text-xs font-bold">0 Items</span>
+                </div>
+
+                <!-- Cart Items List -->
+                <div id="cart-items-container" class="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-2.5 divide-y divide-slate-100 dark:divide-slate-900 text-xs">
+                    <p class="text-center text-slate-400 py-6">Your cart is empty. Add delicious pure veg items from the menu!</p>
+                </div>
+
+                <!-- Cart Summary & Checkout Actions -->
+                <div class="p-3.5 sm:p-4 border-t border-slate-200 dark:border-slate-800 space-y-2.5 bg-slate-50 dark:bg-slate-900/50">
+                    <div class="space-y-1 text-xs">
+                        <div class="flex justify-between text-slate-500">
+                            <span>Subtotal</span>
+                            <span id="cart-subtotal" class="font-bold text-slate-700 dark:text-slate-300">₹0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-500">
+                            <span>Delivery Fee</span>
+                            <span id="cart-delivery-fee" class="font-bold text-slate-700 dark:text-slate-300">₹30</span>
+                        </div>
+                        <div class="flex justify-between text-slate-500">
+                            <span>Discount</span>
+                            <span id="cart-discount" class="font-bold text-emerald-500">-₹0</span>
+                        </div>
+                        <div class="flex justify-between text-sm font-bold pt-1.5 border-t border-slate-200 dark:border-slate-800">
+                            <span>Total Amount</span>
+                            <span id="cart-total" class="text-brand-600 text-base">₹0</span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <input type="text" id="coupon-code-input" placeholder="Coupon (e.g. GAJANAND10)" class="flex-1 px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs uppercase font-bold">
+                        <button onclick="applyCoupon()" class="px-3.5 py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 rounded-xl font-bold text-xs">Apply</button>
+                    </div>
+
+                    <button onclick="openCheckoutModal()" class="w-full py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-brand-500/25 transition-all">
+                        Proceed to Online UPI Checkout <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </aside>
+        </div>
+
+        <div id="tab-content-orders" class="customer-tab flex-1 flex flex-col h-full overflow-y-auto p-3 sm:p-6 hidden space-y-5">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-brand-500"></i> My Account Order Tracking
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Strictly private & secured to your logged-in mobile number account. Only you can view these orders.</p>
+                </div>
+                <button onclick="switchTab('home')" class="px-4 py-2.5 bg-brand-500 text-white rounded-xl text-xs font-bold hover:bg-brand-600 transition-all shrink-0">Back to Menu</button>
+            </div>
+
+            <!-- Logged-in Mobile Verification Card -->
+            <div class="glass-card p-5 rounded-3xl space-y-4 max-w-2xl mx-auto w-full shadow-sm">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Secured Account Mobile Number</span>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span id="active-tracking-phone-display" class="font-extrabold text-sm sm:text-base text-brand-600">Not Logged In</span>
+                        </div>
+                    </div>
+                    <button onclick="openLoginModal()" class="px-3.5 py-2 rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-600 font-bold text-xs hover:bg-brand-100 transition-all">
+                        <i class="fa-solid fa-user-pen mr-1"></i> Login / Switch Account
+                    </button>
+                </div>
+                <div id="account-lock-notice" class="p-3 bg-brand-50 dark:bg-brand-950/40 rounded-2xl border border-brand-200 dark:border-brand-900 text-brand-700 dark:text-brand-300 text-[11px] flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-base shrink-0"></i>
+                    <span>For your privacy and security, orders are automatically filtered and displayed exclusively for your authenticated mobile number.</span>
+                </div>
+            </div>
+
+            <!-- Secured Account Orders Container -->
+            <div id="customer-orders-container" class="space-y-4 max-w-2xl mx-auto w-full pb-16">
+                <div class="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-2">
+                    <div class="w-12 h-12 bg-brand-50 dark:bg-brand-950/50 text-brand-500 rounded-2xl flex items-center justify-center mx-auto text-xl">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <p class="font-bold text-sm">Please Log In to View Your Secured Orders</p>
+                    <p class="text-xs text-slate-400 max-w-sm mx-auto">Your order history is kept private and safe. Log in with your registered mobile number to track your delicious pure veg meals.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="help-chat-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+        <div class="glass-card w-full max-w-lg p-4 sm:p-6 rounded-3xl shadow-2xl relative my-auto text-xs flex flex-col h-[520px]">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 mb-3">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-brand-500 text-white rounded-xl flex items-center justify-center font-bold text-xs">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-xs sm:text-sm">Customer Help & Support Chat</h3>
+                        <p class="text-[9px] text-emerald-500 font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Support Online (Helpline: 8980008510)</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('help-chat-modal')" class="text-slate-400 hover:text-slate-600 p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div id="chat-messages-container" class="flex-1 overflow-y-auto space-y-3 p-3 bg-slate-50 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs">
+                <div class="flex items-start space-x-2">
+                    <div class="w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0">R</div>
+                    <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[85%] text-slate-700 dark:text-slate-200">
+                        Hello! Welcome to Jay Gajanand Vishnu Restaurant. All items are 100% Pure Vegetarian. How can we help you today?
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 mt-3 border-t border-slate-200 dark:border-slate-800 flex gap-2">
+                <input type="text" id="chat-user-input" placeholder="Type your query..." onkeypress="if(event.key==='Enter')sendChatMessage()" class="flex-1 p-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 text-xs">
+                <button onclick="sendChatMessage()" class="px-4 py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-md transition-all">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="glass-card w-full max-w-md p-5 sm:p-6 rounded-3xl shadow-2xl relative my-auto text-xs">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 mb-3">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-brand-500 text-white rounded-xl flex items-center justify-center font-bold text-xs">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <h3 id="login-modal-title" class="font-bold text-xs sm:text-sm">Customer Account & Mobile Login</h3>
+                </div>
+                <button onclick="closeModal('login-modal')" class="text-slate-400 hover:text-slate-600 p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div id="auth-view-login" class="space-y-3.5">
+                <div class="p-3 bg-brand-50 dark:bg-brand-950/40 rounded-2xl border border-brand-200 dark:border-brand-900 text-brand-700 dark:text-brand-300 text-[10px]">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Enter your registered mobile number and password to securely access your personal orders.
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-semibold">Mobile Number or Email</label>
+                    <input type="text" id="login-identifier" placeholder="Enter mobile or email" class="w-full p-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs">
+                </div>
+                <div class="space-y-1">
+                    <div class="flex justify-between items-center">
+                        <label class="block font-semibold">Password</label>
+                        <button type="button" onclick="switchAuthView('forgot')" class="text-brand-600 hover:underline text-[11px]">Forgot Password?</button>
+                    </div>
+                    <input type="password" id="login-password" placeholder="••••••••" class="w-full p-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs">
+                </div>
+                <button type="button" onclick="handleUserLogin()" class="w-full py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-md transition-all">Login to Account</button>
+                <div class="text-center pt-1">
+                    <p class="text-slate-500">Don't have an account? <button type="button" onclick="switchAuthView('register')" class="text-brand-600 font-bold hover:underline">Register New User</button></p>
+                </div>
+            </div>
+
+            <div id="auth-view-register" class="space-y-3.5 hidden">
+                <div class="p-2.5 bg-brand-50 dark:bg-brand-950/40 rounded-xl border border-brand-200 dark:border-brand-900 text-brand-700 dark:text-brand-300 text-[10px] font-medium">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Register with your 10-digit mobile number for secure personal order tracking!
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div class="space-y-1">
+                        <label class="block font-semibold">Full Name</label>
+                        <input type="text" id="reg-name" placeholder="John Doe" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block font-semibold">Mobile Number</label>
+                        <input type="tel" id="reg-phone" maxlength="10" placeholder="10-digit mobile" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold">
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-semibold">Email Address</label>
+                    <input type="email" id="reg-email" placeholder="john@example.com" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs">
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-semibold">Create Password</label>
+                    <input type="password" id="reg-password" placeholder="At least 6 characters" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs">
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-semibold">Delivery Address</label>
+                    <textarea id="reg-address" rows="2" placeholder="House/Flat no, Street..." class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"></textarea>
+                </div>
+                <button type="button" onclick="handleUserRegistration()" class="w-full py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-md transition-all">Complete Registration</button>
+                <div class="text-center pt-1">
+                    <p class="text-slate-500">Already registered? <button type="button" onclick="switchAuthView('login')" class="text-brand-600 font-bold hover:underline">Back to Login</button></p>
+                </div>
+            </div>
+
+            <div id="auth-view-forgot" class="space-y-3.5 hidden">
+                <p class="text-slate-500 text-xs">Enter your registered mobile number or email to receive password recovery instructions.</p>
+                <div class="space-y-1">
+                    <label class="block font-semibold">Mobile / Email</label>
+                    <input type="text" id="forgot-identifier" placeholder="Enter mobile or email" class="w-full p-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs">
+                </div>
+                <button type="button" onclick="handleForgotPassword()" class="w-full py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-md transition-all">Send Recovery Link</button>
+                <div class="text-center pt-1">
+                    <button type="button" onclick="switchAuthView('login')" class="text-brand-600 font-bold hover:underline">Back to Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="checkout-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="glass-card w-full max-w-lg p-5 sm:p-6 rounded-3xl shadow-2xl relative my-auto text-xs">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 mb-3">
+                <h3 class="font-bold text-xs sm:text-sm"><i class="fa-solid fa-lock mr-2 text-brand-500"></i>Secure UPI Online Checkout</h3>
+                <button onclick="closeModal('checkout-modal')" class="text-slate-400 hover:text-slate-600 p-2"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold mb-1">Customer Name</label>
+                        <input type="text" id="checkout-name" placeholder="Enter full name" required class="w-full p-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">Mobile Number (Account Locked)</label>
+                        <input type="tel" id="checkout-phone" maxlength="10" placeholder="10-digit mobile" readonly class="w-full p-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-500 cursor-not-allowed">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1">Delivery Address</label>
+                    <textarea id="checkout-address" rows="2" placeholder="House no, Street, Landmark..." required class="w-full p-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs"></textarea>
+                </div>
+                
+                <div class="p-4 bg-brand-50 dark:bg-brand-950/30 rounded-2xl border border-brand-200 dark:border-brand-900 text-center space-y-2.5">
+                    <p class="font-bold text-brand-700 dark:text-brand-300 text-xs sm:text-sm">Scan & Pay via UPI (9512658309-5@ybl)</p>
+                    <div id="checkout-qrcode-container" class="bg-white p-2.5 rounded-xl inline-block shadow-sm"></div>
+                    <p id="checkout-qr-amount" class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100">Total: ₹0</p>
+                    <p class="text-[10px] text-slate-500">After payment, enter your 12-digit UTR transaction reference number below:</p>
+                    <input type="text" id="checkout-utr" placeholder="Enter 12-digit UTR / UPI Ref ID" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-center font-bold text-xs">
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-1">
+                    <button type="button" onclick="closeModal('checkout-modal')" class="px-4 py-3 bg-slate-200 dark:bg-slate-800 rounded-xl font-semibold">Cancel</button>
+                    <button type="button" onclick="submitOrder()" class="px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold shadow-md">Confirm & Place Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let products = [];
+        let categories = ['All', 'Special Thali', 'Fast Food', 'Snacks', 'Beverages', 'Pure Veg Specials'];
+        let cart = [];
+        let myOrders = [];
+        let settings = { name: 'JAY GAJANAND VISHNU RESTAURANT', upi: '9512658309-5@ybl', phone: '8980008510', deliveryFee: 30, isOpen: true, acceptingOrders: true };
+        let appliedCoupon = null;
+        let selectedCategoryFilter = 'All';
+        let currentUser = null;
+
+        window.onload = function() {
+            const savedUser = localStorage.getItem('jgvr_current_user');
+            if (savedUser) {
+                try { 
+                    currentUser = JSON.parse(savedUser); 
+                } catch(e) { currentUser = null; }
+            }
+            renderAuthHeader();
+            initFirebaseSync();
+        };
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `p-3.5 rounded-xl shadow-xl text-xs font-semibold text-white transition-all transform translate-y-2 opacity-0 ${type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`;
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 50);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.customer-tab').forEach(el => el.classList.add('hidden'));
+            if (tabName === 'home') {
+                document.getElementById('tab-content-home').classList.remove('hidden');
+            } else if (tabName === 'orders') {
+                document.getElementById('tab-content-orders').classList.remove('hidden');
+                renderUserAccountOrders();
+            }
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('hidden');
+                el.classList.add('flex');
+                if (id === 'checkout-modal') updateCheckoutQR();
+            }
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('flex');
+                el.classList.add('hidden');
+            }
+        }
+
+        function openHelpChatModal() {
+            openModal('help-chat-modal');
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-user-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const container = document.getElementById('chat-messages-container');
+            container.innerHTML += `
+                <div class="flex items-start justify-end space-x-2">
+                    <div class="bg-brand-500 text-white p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%]">${text}</div>
+                    <div class="w-6 h-6 rounded-full bg-slate-700 text-white flex items-center justify-center text-[10px] font-bold shrink-0">U</div>
+                </div>
+            `;
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
+
+            setTimeout(() => {
+                let reply = "Thank you for contacting Jay Gajanand Vishnu Restaurant. All items are 100% Pure Vegetarian. For your private order tracking, please check the 'My Orders' tab after logging into your account!";
+                const lower = text.toLowerCase();
+                if (lower.includes('payment') || lower.includes('upi') || lower.includes('utr')) {
+                    reply = "Our official UPI VPA is 9512658309-5@ybl. After QR scan payment, enter your 12-digit UTR reference number.";
+                } else if (lower.includes('delivery') || lower.includes('time') || lower.includes('track')) {
+                    reply = "Your orders are strictly secured and tied to your logged-in mobile number account in the 'My Orders' section.";
+                } else if (lower.includes('veg') || lower.includes('pure')) {
+                    reply = "Yes! We serve 100% Pure Vegetarian Kathiyawadi & Fast Food delicacies.";
+                }
+
+                container.innerHTML += `
+                    <div class="flex items-start space-x-2">
+                        <div class="w-6 h-6 rounded-full bg-brand-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0">R</div>
+                        <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[85%] text-slate-700 dark:text-slate-200">${reply}</div>
+                    </div>
+                `;
+                container.scrollTop = container.scrollHeight;
+            }, 800);
+        }
+
+        function switchAuthView(viewName) {
+            document.getElementById('auth-view-login').classList.add('hidden');
+            document.getElementById('auth-view-register').classList.add('hidden');
+            document.getElementById('auth-view-forgot').classList.add('hidden');
+
+            const titleEl = document.getElementById('login-modal-title');
+            if (viewName === 'login') {
+                document.getElementById('auth-view-login').classList.remove('hidden');
+                if (titleEl) titleEl.innerText = 'Customer Account & Mobile Login';
+            } else if (viewName === 'register') {
+                document.getElementById('auth-view-register').classList.remove('hidden');
+                if (titleEl) titleEl.innerText = 'New User Registration';
+            } else if (viewName === 'forgot') {
+                document.getElementById('auth-view-forgot').classList.remove('hidden');
+                if (titleEl) titleEl.innerText = 'Password Recovery & Reset';
+            }
+        }
+
+        function openLoginModal() {
+            switchAuthView('login');
+            openModal('login-modal');
+        }
+
+        function renderAuthHeader() {
+            const container = document.getElementById('auth-header-actions');
+            if (!container) return;
+
+            if (currentUser) {
+                container.innerHTML = `
+                    <div class="flex items-center space-x-1.5 bg-slate-100 dark:bg-slate-900 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
+                        <i class="fa-solid fa-user-check text-emerald-500"></i>
+                        <span class="font-bold hidden md:inline truncate max-w-[100px]">${currentUser.name}</span>
+                        <button onclick="handleUserLogout()" title="Logout" class="text-red-500 hover:text-red-700 ml-1 font-bold"><i class="fa-solid fa-power-off"></i></button>
+                    </div>
+                `;
+                const displayEl = document.getElementById('active-tracking-phone-display');
+                if (displayEl) displayEl.innerText = '+91 ' + currentUser.phone + ' (' + currentUser.name + ')';
+            } else {
+                container.innerHTML = `
+                    <button onclick="openLoginModal()" class="px-2.5 sm:px-3 py-2 rounded-xl bg-brand-500 text-white text-[11px] sm:text-xs font-bold hover:bg-brand-600 transition-colors shadow-sm flex items-center gap-1">
+                        <i class="fa-solid fa-user"></i><span class="hidden xs:inline">Login</span>
+                    </button>
+                `;
+                const displayEl = document.getElementById('active-tracking-phone-display');
+                if (displayEl) displayEl.innerText = 'Not Logged In (Please Login)';
+            }
+            if (!document.getElementById('tab-content-orders').classList.contains('hidden')) {
+                renderUserAccountOrders();
+            }
+        }
+
+        function handleUserRegistration() {
+            const name = document.getElementById('reg-name').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+            const address = document.getElementById('reg-address').value.trim();
+
+            if (!name || !phone || !email || !password) {
+                showToast("Please fill all required fields", "error");
+                return;
+            }
+            if (phone.length !== 10) {
+                showToast("Please enter a valid 10-digit mobile number", "error");
+                return;
+            }
+            if (password.length < 6) {
+                showToast("Password must be at least 6 characters long", "error");
+                return;
+            }
+
+            const { db, appId, ref, set, push } = window.firebaseApp;
+            const newUserObj = { name, phone, email, password, address, createdAt: new Date().toISOString() };
+            
+            const userRef = push(ref(db, `artifacts/${appId}/public/data/users`));
+            set(userRef, newUserObj);
+
+            currentUser = newUserObj;
+            localStorage.setItem('jgvr_current_user', JSON.stringify(currentUser));
+            
+            showToast("Registration successful! Welcome.");
+            renderAuthHeader();
+            closeModal('login-modal');
+        }
+
+        function handleUserLogin() {
+            const identifier = document.getElementById('login-identifier').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+
+            if (!identifier || !password) {
+                showToast("Please enter login credentials", "error");
+                return;
+            }
+
+            const { db, appId, ref, get } = window.firebaseApp;
+            get(ref(db, `artifacts/${appId}/public/data/users`)).then((snapshot) => {
+                const val = snapshot.val();
+                let foundUser = null;
+                if (val) {
+                    const usersList = Object.values(val);
+                    foundUser = usersList.find(u => (u.email === identifier || u.phone === identifier) && u.password === password);
+                }
+
+                if (foundUser) {
+                    currentUser = foundUser;
+                    localStorage.setItem('jgvr_current_user', JSON.stringify(currentUser));
+                    showToast(`Welcome back, ${currentUser.name}!`);
+                    renderAuthHeader();
+                    closeModal('login-modal');
+                } else {
+                    showToast("Invalid credentials or user not registered", "error");
+                }
+            }).catch(err => {
+                showToast("Login failed. Check connection.", "error");
+            });
+        }
+
+        function handleForgotPassword() {
+            const identifier = document.getElementById('forgot-identifier').value.trim();
+            if (!identifier) {
+                showToast("Please enter your registered mobile or email", "error");
+                return;
+            }
+
+            const { db, appId, ref, get } = window.firebaseApp;
+            get(ref(db, `artifacts/${appId}/public/data/users`)).then((snapshot) => {
+                const val = snapshot.val();
+                let exists = false;
+                if (val) {
+                    const usersList = Object.values(val);
+                    exists = usersList.some(u => u.email === identifier || u.phone === identifier);
+                }
+
+                if (exists) {
+                    showToast("Password reset recovery instructions sent!");
+                    switchAuthView('login');
+                } else {
+                    showToast("Account not found with this identifier", "error");
+                }
+            });
+        }
+
+        function handleUserLogout() {
+            currentUser = null;
+            localStorage.removeItem('jgvr_current_user');
+            renderAuthHeader();
+            showToast("Successfully logged out");
+            switchTab('home');
+        }
+
+        function initFirebaseSync() {
+            const { db, appId, ref, onValue } = window.firebaseApp;
+
+            onValue(ref(db, `artifacts/${appId}/public/data/products`), (snapshot) => {
+                const val = snapshot.val();
+                if (val) {
+                    products = Object.keys(val).map(key => ({ id: key, ...val[key] }));
+                } else {
+                    seedDefaultProducts();
+                }
+                renderUserMenu();
+            });
+
+            onValue(ref(db, `artifacts/${appId}/public/data/categories`), (snapshot) => {
+                const val = snapshot.val();
+                if (val) categories = Object.values(val);
+                renderCategoriesUI();
+            });
+
+            onValue(ref(db, `artifacts/${appId}/public/data/orders`), (snapshot) => {
+                const val = snapshot.val();
+                if (val) {
+                    myOrders = Object.keys(val).map(key => ({ id: key, ...val[key] }));
+                } else {
+                    myOrders = [];
+                }
+                if (!document.getElementById('tab-content-orders').classList.contains('hidden')) {
+                    renderUserAccountOrders();
+                }
+            });
+        }
+
+        function seedDefaultProducts() {
+            const { db, appId, ref, set } = window.firebaseApp;
+            const defaultProducts = [
+                { id: 'p1', name: 'Special Kathiyawadi Thali', category: 'Special Thali', price: 180, prepTime: 20, image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=500', desc: 'Traditional Kathiyawadi Sabzi, Roti, Dal, Rice & Sweet. 100% Pure Veg.', available: true, veg: true },
+                { id: 'p2', name: 'Paneer Angara Special', category: 'Pure Veg Specials', price: 240, prepTime: 15, image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=500', desc: 'Smoked spicy paneer gravy with rich aromatic spices. Pure Veg.', available: true, veg: true },
+                { id: 'p3', name: 'Crispy Veg Burger', category: 'Fast Food', price: 90, prepTime: 10, image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500', desc: 'Crispy pure veg patty with fresh lettuce and house mayo.', available: true, veg: true },
+                { id: 'p4', name: 'Masala Cold Coffee', category: 'Beverages', price: 70, prepTime: 5, image: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=500', desc: 'Chilled blended creamy coffee with chocolate drizzle.', available: true, veg: true }
+            ];
+            set(ref(db, `artifacts/${appId}/public/data/products`), defaultProducts.reduce((acc, curr) => ({ ...acc, [curr.id]: curr }), {}));
+            set(ref(db, `artifacts/${appId}/public/data/categories`), ['All', 'Special Thali', 'Fast Food', 'Snacks', 'Beverages', 'Pure Veg Specials']);
+        }
+
+        function renderCategoriesUI() {
+            const container = document.getElementById('user-categories-container');
+            if (container) {
+                container.innerHTML = categories.map(cat => `
+                    <button onclick="filterCategory('${cat}')" class="px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${selectedCategoryFilter === cat ? 'bg-brand-500 text-white shadow-md' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'}">
+                        ${cat}
+                    </button>
+                `).join('');
+            }
+        }
+
+        function filterCategory(cat) {
+            selectedCategoryFilter = cat;
+            document.getElementById('selected-category-title').innerText = cat === 'All' ? 'All Menu Items (100% Pure Veg)' : cat;
+            renderUserMenu();
+            renderCategoriesUI();
+        }
+
+        function renderUserMenu() {
+            const grid = document.getElementById('user-products-grid');
+            if (!grid) return;
+            const searchVal = document.getElementById('user-search-input')?.value.toLowerCase() || '';
+
+            const filtered = products.filter(p => {
+                const matchCat = selectedCategoryFilter === 'All' || p.category === selectedCategoryFilter;
+                const matchSearch = p.name.toLowerCase().includes(searchVal) || p.desc.toLowerCase().includes(searchVal);
+                return matchCat && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400 text-xs">No menu items found.</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => `
+                <div class="glass-card rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between transition-transform duration-300">
+                    <div class="relative h-44 sm:h-48 overflow-hidden bg-slate-200 dark:bg-slate-800">
+                        <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f97316/ffffff?text=Pure+Veg'">
+                        <div class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-[10px] font-bold text-emerald-600 flex items-center gap-1 shadow-sm">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 100% Pure Veg
+                        </div>
+                    </div>
+                    <div class="p-3.5 sm:p-4 space-y-2 flex-1 flex flex-col justify-between text-xs">
+                        <div>
+                            <div class="flex justify-between items-start gap-2">
+                                <h4 class="font-bold text-sm leading-snug">${p.name}</h4>
+                                <span class="font-extrabold text-brand-600 text-sm">₹${p.price}</span>
+                            </div>
+                            <p class="text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">${p.desc}</p>
+                        </div>
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <span class="text-[10px] text-slate-400"><i class="fa-solid fa-clock mr-1"></i>${p.prepTime} mins</span>
+                            <button onclick="addToCart('${p.id}')" class="px-3.5 py-2 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl shadow-md transition-all">
+                                <i class="fa-solid fa-plus mr-1"></i>Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterUserProducts() {
+            renderUserMenu();
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            const existing = cart.find(item => item.id === productId);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+            updateCartUI();
+            showToast(`Added ${product.name}`);
+        }
+
+        function updateCartQuantity(productId, delta) {
+            const item = cart.find(i => i.id === productId);
+            if (!item) return;
+            item.qty += delta;
+            if (item.qty <= 0) {
+                cart = cart.filter(i => i.id !== productId);
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-items-container');
+            const countBadge = document.getElementById('cart-item-count');
+            const subtotalEl = document.getElementById('cart-subtotal');
+            const deliveryEl = document.getElementById('cart-delivery-fee');
+            const discountEl = document.getElementById('cart-discount');
+            const totalEl = document.getElementById('cart-total');
+
+            const totalCount = cart.reduce((acc, curr) => acc + curr.qty, 0);
+            if (countBadge) countBadge.innerText = `${totalCount} Items`;
+
+            if (cart.length === 0) {
+                if (container) container.innerHTML = `<p class="text-center text-slate-400 py-6">Your cart is empty. Add delicious pure veg items from the menu!</p>`;
+                if (subtotalEl) subtotalEl.innerText = '₹0';
+                if (totalEl) totalEl.innerText = '₹0';
+                return;
+            }
+
+            if (container) {
+                container.innerHTML = cart.map(item => `
+                    <div class="flex items-center justify-between py-2">
+                        <div class="flex-1 pr-2">
+                            <p class="font-bold">${item.name}</p>
+                            <p class="text-slate-500 text-[10px]">₹${item.price} x ${item.qty}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="updateCartQuantity('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-900 font-bold">-</button>
+                            <span class="font-bold">${item.qty}</span>
+                            <button onclick="updateCartQuantity('${item.id}', 1)" class="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-900 font-bold">+</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const subtotal = cart.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
+            const deliveryFee = subtotal > 0 ? settings.deliveryFee : 0;
+            let discount = appliedCoupon ? (subtotal * appliedCoupon.discount / 100) : 0;
+            const total = Math.max(0, subtotal + deliveryFee - discount);
+
+            if (subtotalEl) subtotalEl.innerText = `₹${subtotal}`;
+            if (deliveryEl) deliveryEl.innerText = `₹${deliveryFee}`;
+            if (discountEl) discountEl.innerText = `-₹${discount}`;
+            if (totalEl) totalEl.innerText = `₹${total}`;
+        }
+
+        function applyCoupon() {
+            const code = document.getElementById('coupon-code-input').value.trim().toUpperCase();
+            if (code === 'GAJANAND10' || code === 'WELCOME50') {
+                appliedCoupon = { code, discount: code === 'GAJANAND10' ? 10 : 20 };
+                showToast(`Coupon ${code} applied!`);
+                updateCartUI();
+            } else {
+                showToast("Invalid or expired coupon code", "error");
+            }
+        }
+
+        function openCheckoutModal() {
+            if (cart.length === 0) {
+                showToast("Your cart is empty!", "error");
+                return;
+            }
+            if (!currentUser) {
+                showToast("Please login with your mobile number first", "error");
+                openLoginModal();
+                return;
+            }
+            if (currentUser) {
+                if (document.getElementById('checkout-name')) document.getElementById('checkout-name').value = currentUser.name || '';
+                if (document.getElementById('checkout-phone')) document.getElementById('checkout-phone').value = currentUser.phone || '';
+                if (document.getElementById('checkout-address')) document.getElementById('checkout-address').value = currentUser.address || '';
+            }
+            openModal('checkout-modal');
+        }
+
+        function updateCheckoutQR() {
+            const subtotal = cart.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
+            const deliveryFee = subtotal > 0 ? settings.deliveryFee : 0;
+            const discount = appliedCoupon ? (subtotal * appliedCoupon.discount / 100) : 0;
+            const total = Math.max(0, subtotal + deliveryFee - discount);
+
+            const container = document.getElementById('checkout-qrcode-container');
+            const amountEl = document.getElementById('checkout-qr-amount');
+            if (amountEl) amountEl.innerText = `Total Amount: ₹${total}`;
+
+            if (container) {
+                container.innerHTML = '';
+                const upiString = `upi://pay?pa=${settings.upi}&pn=${encodeURIComponent(settings.name)}&am=${total}&cu=INR`;
+                new QRCode(container, { text: upiString, width: 150, height: 150 });
+            }
+        }
+
+        function submitOrder() {
+            if (!currentUser || !currentUser.phone) {
+                showToast("Session expired. Please login again.", "error");
+                openLoginModal();
+                return;
+            }
+
+            const name = document.getElementById('checkout-name').value.trim();
+            const phone = currentUser.phone; // Locked to logged-in account mobile number
+            const address = document.getElementById('checkout-address').value.trim();
+            const utr = document.getElementById('checkout-utr').value.trim();
+
+            if (!name || !address || !utr) {
+                showToast("Please fill all details & UPI UTR reference number", "error");
+                return;
+            }
+
+            const subtotal = cart.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
+            const deliveryFee = subtotal > 0 ? settings.deliveryFee : 0;
+            const discount = appliedCoupon ? (subtotal * appliedCoupon.discount / 100) : 0;
+            const total = Math.max(0, subtotal + deliveryFee - discount);
+
+            const newOrder = {
+                id: 'GJV' + Math.floor(1000 + Math.random() * 9000),
+                customerName: name,
+                customerPhone: phone, // Tied to logged-in user mobile number
+                address: address,
+                items: [...cart],
+                subtotal: subtotal,
+                total: total,
+                utr: utr,
+                paymentMode: 'UPI (9512658309-5@ybl)',
+                status: 'NEW',
+                timestamp: new Date().toISOString()
+            };
+
+            const { db, appId, ref, push, set } = window.firebaseApp;
+            const newOrderRef = push(ref(db, `artifacts/${appId}/public/data/orders`));
+            set(newOrderRef, newOrder);
+
+            showToast("Order placed successfully with UPI payment!");
+            cart = [];
+            updateCartUI();
+            closeModal('checkout-modal');
+            
+            // Switch to secured account orders tracking tab
+            switchTab('orders');
+        }
+
+        function renderUserAccountOrders() {
+            const container = document.getElementById('customer-orders-container');
+            if (!container) return;
+
+            if (!currentUser || !currentUser.phone) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-3">
+                        <div class="w-12 h-12 bg-brand-50 dark:bg-brand-950/50 text-brand-500 rounded-2xl flex items-center justify-center mx-auto text-xl">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                        <p class="font-bold text-sm">Please Log In to View Your Secured Orders</p>
+                        <p class="text-xs text-slate-400 max-w-sm mx-auto">Your orders are strictly tied and secured to your mobile account number and cannot be accessed by anyone else.</p>
+                        <button onclick="openLoginModal()" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold transition-all shadow-md">
+                            <i class="fa-solid fa-user mr-1"></i> Login with Mobile Number
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            // STRICT FILTERING: Only orders matching the logged-in user's mobile number are shown
+            const userPhone = currentUser.phone;
+            const matchedOrders = myOrders.filter(o => o.customerPhone === userPhone);
+
+            if (matchedOrders.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 space-y-2">
+                        <div class="w-12 h-12 bg-brand-50 dark:bg-brand-950/50 text-brand-500 rounded-2xl flex items-center justify-center mx-auto text-xl">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                        <p class="font-bold text-sm">No Orders Found for +91 ${userPhone}</p>
+                        <p class="text-xs text-slate-400 max-w-sm mx-auto">You haven't placed any orders yet from this account. Explore our menu and place your first pure vegetarian order!</p>
+                        <button onclick="switchTab('home')" class="mt-2 px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold transition-all shadow-md">
+                            Browse Pure Veg Menu
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = matchedOrders.reverse().map(o => `
+                <div class="glass-card p-4 sm:p-5 rounded-3xl space-y-4 text-xs shadow-sm border border-slate-200 dark:border-slate-800">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                        <div>
+                            <span class="font-bold text-sm text-brand-600">${o.id}</span>
+                            <p class="text-[10px] text-slate-400">${new Date(o.timestamp).toLocaleString()}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full font-bold text-[10px] ${o.status === 'NEW' ? 'bg-amber-100 text-amber-700 animate-pulse' : o.status === 'DELIVERED' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}">
+                            Status: ${o.status}
+                        </span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <p class="font-bold text-slate-600 dark:text-slate-300">Ordered Items (100% Pure Veg):</p>
+                        <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                            ${o.items.map(i => `
+                                <div class="flex justify-between py-1.5">
+                                    <span>${i.qty}x${i.name}</span>
+                                    <span class="font-semibold">₹${i.price * i.qty}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Live Status Timeline Tracker -->
+                    <div class="pt-3 border-t border-slate-200 dark:border-slate-800">
+                        <p class="font-bold mb-2.5 uppercase tracking-wider text-[10px] text-slate-400">Live Status Timeline</p>
+                        <div class="grid grid-cols-4 gap-1.5 text-center text-[10px]">
+                            <div class="p-2.5 rounded-xl ${['NEW', 'ACCEPTED', 'PREPARING', 'READY', 'DELIVERED'].includes(o.status) ? 'bg-brand-500 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-900 text-slate-400'}">
+                                <i class="fa-solid fa-receipt block mb-0.5 text-xs"></i> Placed
+                            </div>
+                            <div class="p-2.5 rounded-xl ${['ACCEPTED', 'PREPARING', 'READY', 'DELIVERED'].includes(o.status) ? 'bg-brand-500 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-900 text-slate-400'}">
+                                <i class="fa-solid fa-check-circle block mb-0.5 text-xs"></i> Accepted
+                            </div>
+                            <div class="p-2.5 rounded-xl ${['PREPARING', 'READY', 'DELIVERED'].includes(o.status) ? 'bg-brand-500 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-900 text-slate-400'}">
+                                <i class="fa-solid fa-fire-burner block mb-0.5 text-xs"></i> Preparing
+                            </div>
+                            <div class="p-2.5 rounded-xl ${['READY', 'DELIVERED'].includes(o.status) ? 'bg-emerald-500 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-900 text-slate-400'}">
+                                <i class="fa-solid fa-motorcycle block mb-0.5 text-xs"></i> Delivered
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 font-bold text-xs sm:text-sm bg-slate-50 dark:bg-slate-900/40 p-3 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <span>Total Paid (UPI UTR: ${o.utr})</span>
+                        <span class="text-brand-600">₹${o.total}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
+
